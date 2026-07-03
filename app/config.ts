@@ -7,4 +7,7 @@ export const SITE = {
 } as const;
 
 // Top navigation links. Add routes in app/routes.ts and list them here.
-export const NAV_LINKS: { href: string; label: string }[] = [];
+export const NAV_LINKS: { href: string; label: string }[] = [
+  { href: "/db-demo", label: "DB Demo" },
+  { href: "/api-demo", label: "API Demo" },
+];

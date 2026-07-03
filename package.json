@@ -1,5 +1,5 @@
 {
-  "name": "visionbasictemplate",
+  "name": "visiontemplate",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,9 @@
     "@fontsource-variable/geist-mono": "^5.2.8",
     "@react-router/node": "8.0.0",
     "@react-router/serve": "8.0.0",
+    "dotenv": "^17.4.2",
     "isbot": "^5.1.36",
+    "pg": "^8.22.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router": "8.0.0"
@@ -22,6 +24,7 @@
     "@react-router/dev": "8.0.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^22",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.2.2",
