@@ -22,9 +22,8 @@
 
   vars:
     # Users added to the `docker` group so they can run docker without sudo.
-    # Should match the SSH_USER used by .github/workflows/deploy.yml.
-    docker_users:
-      - deploy
+    # (The deploy_user below is already added to docker; list OTHERS here.)
+    docker_users: []
 
     # Map ansible architecture to Debian dpkg arch for the apt source [arch=...].
     docker_arch_map:
@@ -33,6 +32,21 @@
       armv7l: armhf
     docker_arch: "{{ docker_arch_map[ansible_facts['architecture']] | default('amd64') }}"
     docker_apt_channel: stable
+
+    # ---- deploy user (the account GitHub Actions SSHes in as) ----
+    deploy_user: deploy
+    deploy_user_shell: /bin/bash
+    # Passwordless sudo so deploy can fix perms / restart services in scripts.
+    deploy_passwordless_sudo: true
+    # Absolute path the repo will be cloned to on the host (DEPLOY_PATH GitHub secret).
+    deploy_path: /srv/visiontemplate
+    # Grant deploy the same SSH keys that currently allow root access, so whoever
+    # can reach root can also reach deploy. Set false to manage keys manually.
+    copy_root_authorized_keys_to_deploy: true
+    # Extra SSH public-key strings to also authorize for deploy (e.g. the keypair
+    # whose private half you store as the GitHub SSH_KEY secret). Example:
+    #   - "ssh-ed25519 AAAA... github-actions-deploy"
+    deploy_extra_authorized_keys: []
 
   pre_tasks:
     - name: Verify this is a Debian host
@@ -122,6 +136,75 @@
         append: true
       loop: "{{ docker_users }}"
 
+    # ----------------------------------------------------------------------
+    # deploy user: the account GitHub Actions SSHes in as to run
+    # scripts/deploy.sh. Created with a home, bash shell, docker group
+    # membership, passwordless sudo, and an authorized_keys derived from
+    # root's so existing access transfers automatically.
+    # ----------------------------------------------------------------------
+    - name: Ensure deploy user exists (bash shell, home, in docker group)
+      ansible.builtin.user:
+        name: "{{ deploy_user }}"
+        shell: "{{ deploy_user_shell }}"
+        home: "/home/{{ deploy_user }}"
+        create_home: true
+        groups: docker
+        append: true
+
+    - name: Grant deploy passwordless sudo (validated with visudo)
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ deploy_user }}"
+        content: "{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        owner: root
+        group: root
+        mode: "0440"
+        validate: /usr/sbin/visudo -csf %s
+      when: deploy_passwordless_sudo | bool
+
+    - name: Create DEPLOY_PATH owned by deploy (where the repo will be cloned)
+      ansible.builtin.file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0755"
+
+    - name: Ensure deploy ~/.ssh exists with correct perms
+      ansible.builtin.file:
+        path: "/home/{{ deploy_user }}/.ssh"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0700"
+
+    - name: Check whether root has an authorized_keys file
+      ansible.builtin.stat:
+        path: /root/.ssh/authorized_keys
+      register: root_authkeys
+
+    - name: Copy root's authorized_keys to deploy (same SSH access as root)
+      ansible.builtin.copy:
+        remote_src: true
+        src: /root/.ssh/authorized_keys
+        dest: "/home/{{ deploy_user }}/.ssh/authorized_keys"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+      when:
+        - copy_root_authorized_keys_to_deploy | bool
+        - root_authkeys.stat.exists | bool
+
+    - name: Add any extra authorized keys for deploy
+      ansible.builtin.lineinfile:
+        path: "/home/{{ deploy_user }}/.ssh/authorized_keys"
+        line: "{{ item }}"
+        create: true
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+        state: present
+      loop: "{{ deploy_extra_authorized_keys }}"
+
   post_tasks:
     - name: Report installed versions
       ansible.builtin.command: "{{ item }}"
@@ -141,5 +224,6 @@
     - name: Reminder to re-login for docker group to take effect
       ansible.builtin.debug:
         msg: >-
-          Users in docker_users ({{ docker_users | join(', ') }}) must log out
-          and back in (or run `newgrp docker`) before running docker without sudo.
+          {{ deploy_user }}{% if docker_users | length > 0 %},
+          {{ docker_users | join(', ') }}{% endif %} must log out and back in
+          (or run `newgrp docker`) before running docker without sudo.
