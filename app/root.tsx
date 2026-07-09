@@ -10,8 +10,6 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { SITE } from "./config";
-import { Navbar } from "./components/Navbar";
-import { Footer } from "./components/Footer";
 import { LinkButton } from "./components/Button";
 
 export const meta: Route.MetaFunction = () => [
@@ -29,6 +27,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
         <Meta />
         <Links />
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
@@ -45,13 +53,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <>
-      <Navbar />
-      <main className="flex-1">
-        <Outlet />
-      </main>
-      <Footer />
-    </>
+    <main className="flex-1">
+      <Outlet />
+    </main>
   );
 }
 
