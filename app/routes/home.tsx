@@ -1,93 +1,130 @@
 import type { Route } from "./+types/home";
-import { LinkButton } from "../components/Button";
-import { SITE } from "../config";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: SITE.name },
-    { name: "description", content: SITE.description },
+    { title: "Modern People Leader" },
+    {
+      name: "description",
+      content: "Podcast, Newsletter, & Academy for HR Leaders.",
+    },
   ];
 }
 
-const features = [
-  {
-    title: "Styled out of the box",
-    description:
-      "Geist type, a cool indigo palette, hairline borders, and dark mode by default — all wired to semantic tokens.",
-  },
-  {
-    title: "Reusable pieces",
-    description:
-      "Button, navbar, footer, and theme toggle are ready to drop in. Build your demo, not your boilerplate.",
-  },
-  {
-    title: "Clone and go",
-    description:
-      "Spin up a new repo from this template, rename it in app/config.ts, and you have a clean canvas in seconds.",
-  },
+const NAV = [
+  "Our Story",
+  "Podcast",
+  "Academy",
+  "Sponsors",
+  "Events",
+  "Newsletter",
 ];
+
+// MPL brand palette
+const BLUE = "#2b34c8"; // deep royal background
+const BLUE_ARC = "#3b46d8"; // lighter arc / spotlight
+const YELLOW = "#ffce1f"; // CTA + logo mark
+
+// Radial "starburst" logo mark rendered as evenly spaced dots.
+function LogoMark({ className = "h-9 w-9" }: { className?: string }) {
+  const rings = [
+    { r: 3, count: 1 },
+    { r: 9, count: 8 },
+    { r: 15, count: 16 },
+  ];
+  const dots: { x: number; y: number; s: number }[] = [];
+  for (const ring of rings) {
+    if (ring.count === 1) {
+      dots.push({ x: 24, y: 24, s: 2.6 });
+      continue;
+    }
+    for (let i = 0; i < ring.count; i++) {
+      const a = (i / ring.count) * Math.PI * 2;
+      dots.push({
+        x: 24 + Math.cos(a) * ring.r,
+        y: 24 + Math.sin(a) * ring.r,
+        s: ring.r > 12 ? 1.5 : 1.9,
+      });
+    }
+  }
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
+      {dots.map((d, i) => (
+        <circle key={i} cx={d.x} cy={d.y} r={d.s} fill={YELLOW} />
+      ))}
+    </svg>
+  );
+}
 
 export default function Home() {
   return (
-    <>
+    <div
+      className="relative min-h-screen w-full overflow-hidden font-[Poppins,sans-serif]"
+      style={{ backgroundColor: BLUE }}
+    >
+      {/* Lighter spotlight arc behind the hero */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-[-58%] -z-0 aspect-square w-[150%] -translate-x-1/2 rounded-full sm:w-[125%] lg:w-[92%]"
+        style={{ backgroundColor: BLUE_ARC }}
+      />
+
+      {/* Header */}
+      <header className="relative z-20">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 lg:px-10">
+          <a
+            href="/"
+            className="flex items-center gap-3 text-3xl font-extrabold tracking-tight text-white"
+          >
+            <LogoMark />
+            MPL
+          </a>
+
+          <nav className="hidden items-center gap-9 md:flex">
+            {NAV.map((item) => (
+              <a
+                key={item}
+                href="/"
+                className="text-[17px] font-semibold text-white/95 transition-opacity hover:opacity-70"
+              >
+                {item}
+              </a>
+            ))}
+          </nav>
+
+          <button
+            className="flex flex-col gap-1.5 md:hidden"
+            aria-label="Open menu"
+          >
+            <span className="h-0.5 w-6 bg-white" />
+            <span className="h-0.5 w-6 bg-white" />
+            <span className="h-0.5 w-6 bg-white" />
+          </button>
+        </div>
+      </header>
+
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="bg-grid pointer-events-none absolute inset-0 -z-10" />
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="aurora aurora-1 left-[8%] top-[-10%] h-[26rem] w-[26rem]" />
-          <div className="aurora aurora-2 right-[6%] top-[6%] h-[22rem] w-[22rem]" />
-        </div>
+      <section className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 pb-40 pt-16 text-center sm:pt-20">
+        <p className="mb-7 text-sm font-bold uppercase tracking-[0.12em] text-white sm:text-base">
+          Podcast, Newsletter, &amp; Academy for HR Leaders
+        </p>
 
-        <div className="container mx-auto flex flex-col items-center px-4 pb-20 pt-16 text-center sm:pb-28 sm:pt-24">
-          <span className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-1.5 text-sm text-muted-foreground shadow-xs backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-2" />
-            Demo template
-          </span>
+        <h1 className="text-[13vw] font-extrabold leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-[5.5rem]">
+          Helping HR Leaders Build the Future of Work
+        </h1>
 
-          <h1 className="text-display text-balance max-w-4xl text-foreground">
-            A clean canvas for your <span className="gradient-text-brand">next demo</span>
-          </h1>
+        <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/90 sm:text-xl">
+          We&rsquo;ve learned from the best so you can lead like the best. Now
+          we&rsquo;re sharing those lessons&mdash;through our podcast, events,
+          and Academy&mdash;to help you shape what&rsquo;s next for HR and work.
+        </p>
 
-          <p className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            {SITE.name} ships with a polished design system, sensible defaults,
-            and the building blocks you need — so you can focus on the idea
-            you're showing off
-          </p>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <LinkButton to="/" size="lg">
-              Get started
-            </LinkButton>
-            <LinkButton
-              to="https://reactrouter.com/docs"
-              size="lg"
-              variant="outline"
-              reloadDocument
-            >
-              React Router docs
-            </LinkButton>
-          </div>
-        </div>
+        <a
+          href="/"
+          className="mt-11 inline-flex items-center justify-center rounded-md px-9 py-4 text-lg font-semibold text-black shadow-[4px_4px_0_rgba(0,0,0,0.25)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+          style={{ backgroundColor: YELLOW }}
+        >
+          Listen to podcast
+        </a>
       </section>
-
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20 sm:py-28">
-        <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="card-lift rounded-xl border border-border bg-card p-7"
-            >
-              <h3 className="text-lg font-semibold text-foreground">
-                {feature.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+    </div>
   );
 }
