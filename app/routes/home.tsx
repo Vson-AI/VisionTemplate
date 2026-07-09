@@ -51,7 +51,7 @@ export default function Home() {
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
             {SITE.name} ships with a polished design system, sensible defaults,
             and the building blocks you need — so you can focus on the idea
-            you're showing off.
+            you're showing off
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
