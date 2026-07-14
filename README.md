@@ -9,15 +9,19 @@ Use it as a **GitHub template**: create a new repo from it for each demo, rename
 
 ## Quick start
 
-Requires Node 20+ and a local Postgres install (e.g. `brew install postgresql@14`).
+Requires Node 20+ and a Postgres database (inside Vision one is provisioned for
+you and `DATABASE_URL` is already set; outside Vision, e.g. `brew install
+postgresql@14` and `createdb vision_template`).
 
 ```bash
 npm install
-cp .env.example .env
-createdb vision_template      # requires local Postgres running
-psql -d vision_template -f db/setup.sql
+cp .env.example .env              # set DATABASE_URL if not already provided
+psql "$DATABASE_URL" -f db/setup.sql
 npm run dev
 ```
+
+`db/setup.sql` is idempotent — it runs on every app start/deploy and only
+seeds an empty table. Keep it that way when you extend the schema.
 
 The app runs at `http://localhost:5173`.
 
@@ -72,3 +76,4 @@ npm run start   # serve the production build
 ```
 
 A `Dockerfile` is included for container deploys (Railway, Fly.io, Cloud Run, etc.).
+
